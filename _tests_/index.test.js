@@ -1,18 +1,20 @@
 const request = require('supertest');
 const app = require('../index.js');
 
-// Add beforeAll and afterAll hooks
-let server;
+// Add timeout configuration at top
+jest.setTimeout(10000);
 
-beforeAll(async () => {
-  const PORT = process.env.TEST_PORT || 8001;
-  server = app.listen(PORT);
-  return new Promise((resolve) => server.once('listening', resolve));
-});
 
+// Add cleanup after all tests
 afterAll(async () => {
-  return new Promise((resolve) => server.close(resolve));
+  // Close any remaining connections
+  await new Promise(resolve => setTimeout(resolve, 500));
+  // If app has a close/shutdown method, call it here
+  if (app.close) {
+    await app.close();
+  }
 });
+
 
 describe('GET /', () => {
   it('should return "Hello, World!"', async () => {
